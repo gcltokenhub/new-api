@@ -3,5 +3,5 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TAG="$(deploy/resolve-tag.sh "${1:-}")"
-docker build -f deploy/server.Dockerfile --build-arg "VERSION=${TAG}" -t "new-api-server:${TAG}" .
+docker build --provenance=false --sbom=false -f deploy/server.Dockerfile --build-arg "VERSION=${TAG}" -t "new-api-server:${TAG}" .
 echo "built new-api-server:${TAG}"
