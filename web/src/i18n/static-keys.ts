@@ -90,7 +90,6 @@ export const STATIC_I18N_KEYS = [
   'portal.models.glm',
   'portal.models.doubao',
   'portal.models.kimi',
-  'portal.models.note',
   'portal.models.experience',
   'portal.models.multimodal.title',
   'portal.models.multimodal.description',

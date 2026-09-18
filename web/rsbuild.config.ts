@@ -64,11 +64,19 @@ export default defineConfig(({ envMode }) => {
     },
     html: {
       template: './index.html',
+      favicon: './public/token-factory-mark.svg',
     },
     server: {
       host: '0.0.0.0',
       strictPort: false,
       proxy: devProxy,
+      setup: ({ server }) => {
+        server.middlewares.use('/favicon.ico', (request, response, next) => {
+          if (request.url !== '/' && request.url !== '') return next()
+          response.writeHead(307, { Location: '/token-factory-mark.svg' })
+          response.end()
+        })
+      },
     },
     output: {
       // Production optimizations

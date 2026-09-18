@@ -42,7 +42,7 @@ export function PortalHome(props: { isAuthenticated: boolean }) {
         <PortalHero />
         <PortalCompute />
         <PortalModels />
-        <PortalServices isAuthenticated={props.isAuthenticated} />
+        <PortalServices />
       </main>
       <footer className='portal-footer'>
         <div className='portal-container'>

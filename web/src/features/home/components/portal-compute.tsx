@@ -91,7 +91,7 @@ export function PortalCompute() {
               </dl>
               <img
                 className='portal-node-illustration'
-                src={`/figma/portal-node-${node}.png`}
+                src={`/figma/portal-node-${node}-cutout.png`}
                 alt={t(`portal.compute.${node}.title`)}
                 width='503'
                 height='316'
