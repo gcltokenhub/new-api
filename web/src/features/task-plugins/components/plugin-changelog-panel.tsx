@@ -95,15 +95,17 @@ export function PluginChangelogPanel(props: PluginChangelogPanelProps) {
         <span className='text-muted-foreground font-mono text-xs'>
           v{changelog.version}
         </span>
-        <a
-          href={changelog.sourceUrl}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs'
-        >
-          <ExternalLink className='size-3.5' aria-hidden='true' />
-          {t('View changelog source')}
-        </a>
+        {!/new-?api|quantumnous/i.test(changelog.sourceUrl) && (
+          <a
+            href={changelog.sourceUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs'
+          >
+            <ExternalLink className='size-3.5' aria-hidden='true' />
+            {t('View changelog source')}
+          </a>
+        )}
       </div>
       {locale !== 'en' && changelog.locale === 'en' && (
         <p role='status' className='text-muted-foreground text-xs'>

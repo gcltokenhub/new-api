@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Token Factory">
+  <defs>
+    <linearGradient id="g" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2878F0"/>
+      <stop offset="1" stop-color="#0C4FC4"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)"/>
+  <path fill="#fff" d="M15 16h34v8H36v24h-8V24H15z"/>
+  <path fill="#A8F0D1" d="M39 35h10v13H39z"/>
+</svg>

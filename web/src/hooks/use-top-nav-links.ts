@@ -87,7 +87,10 @@ export function useTopNavLinks(): TopNavLink[] {
   }
 
   // Docs (supports external links)
-  if (modules?.docs !== false) {
+  if (
+    modules?.docs !== false &&
+    !/new-?api|quantumnous/i.test(docsLink ?? '')
+  ) {
     if (docsLink) {
       links.push({ title: t('Docs'), href: docsLink, external: true })
     } else {

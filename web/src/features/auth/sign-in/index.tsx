@@ -31,34 +31,37 @@ export function SignIn() {
   const { status } = useStatus()
 
   return (
-    <AuthLayout>
-      <div className='w-full space-y-8'>
+    <AuthLayout variant='sign-in'>
+      <div className='w-full space-y-6'>
         <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Sign in')}
+          <p className='text-primary text-xs font-semibold'>
+            {t('auth.portal.welcome')}
+          </p>
+          <h2 className='text-2xl font-bold tracking-tight'>
+            {t('auth.portal.loginTitle')}
           </h2>
-          {!status?.self_use_mode_enabled &&
-            status?.register_enabled !== false && (
-              <p className='text-muted-foreground text-left text-sm sm:text-base'>
-                {t("Don't have an account?")}{' '}
-                <Link
-                  to='/sign-up'
-                  className='hover:text-primary font-medium underline underline-offset-4'
-                >
-                  {t('Sign up')}
-                </Link>
-                .
-              </p>
-            )}
+          <p className='text-muted-foreground text-sm'>
+            {t('auth.portal.loginIntro')}
+          </p>
         </div>
 
         <UserAuthForm redirectTo={redirect} />
 
-        <TermsFooter
-          variant='sign-in'
-          status={status}
-          className='text-center'
-        />
+        <div className='space-y-4 text-center'>
+          {!status?.self_use_mode_enabled &&
+            status?.register_enabled !== false && (
+              <p className='text-muted-foreground text-sm'>
+                {t("Don't have an account?")}{' '}
+                <Link
+                  to='/sign-up'
+                  className='text-primary font-medium hover:underline'
+                >
+                  {t('auth.portal.signupEntry')}
+                </Link>
+              </p>
+            )}
+          <TermsFooter variant='sign-in' status={status} />
+        </div>
       </div>
     </AuthLayout>
   )

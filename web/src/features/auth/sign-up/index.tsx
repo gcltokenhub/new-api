@@ -30,13 +30,24 @@ export function SignUp() {
   const { status } = useStatus()
 
   return (
-    <AuthLayout>
-      <div className='w-full space-y-8'>
+    <AuthLayout variant='sign-up'>
+      <div className='w-full space-y-6'>
         <div className='space-y-2'>
-          <h2 className='text-center text-2xl font-semibold tracking-tight sm:text-left'>
-            {t('Create an account')}
+          <p className='text-primary text-xs font-semibold'>
+            {t('auth.portal.start')}
+          </p>
+          <h2 className='text-2xl font-bold tracking-tight'>
+            {t('auth.portal.signupTitle')}
           </h2>
-          <p className='text-muted-foreground text-left text-sm sm:text-base'>
+          <p className='text-muted-foreground text-sm'>
+            {t('auth.portal.signupIntro')}
+          </p>
+        </div>
+
+        <SignUpForm />
+
+        <div className='space-y-4 text-center'>
+          <p className='text-muted-foreground text-sm'>
             {t('Already have an account?')}{' '}
             <Link
               to='/sign-in'
@@ -44,17 +55,9 @@ export function SignUp() {
             >
               {t('Sign in')}
             </Link>
-            .
           </p>
+          <TermsFooter variant='sign-up' status={status} />
         </div>
-
-        <SignUpForm />
-
-        <TermsFooter
-          variant='sign-up'
-          status={status}
-          className='text-center'
-        />
       </div>
     </AuthLayout>
   )
