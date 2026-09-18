@@ -76,6 +76,21 @@ $env:VITE_REACT_APP_SERVER_URL = 'http://127.0.0.1:13000'
 
 本次核验：开发首页 HTTP 200，经 `5173` 代理访问 `/api/status` 返回 `success: true`；编辑组件后 HMR 生效。首次编译约 31 秒，后续观察到的增量编译约 0.7—1 秒（本机记录，不作为性能承诺）。Docker 镜像和运行中的后端未因本次前端修改重新构建或重启；`13000` 中的内嵌前端仍是旧构建，查看本轮修改请使用 `5173`。
 
+## 独立前端发布镜像的依赖安装
+
+`deploy/build-web-image.sh` 使用 `deploy/web.Dockerfile`，与根目录 Dockerfile、CI 对齐到固定 Bun 1.4.0 镜像及摘要。先复制 `web/package.json` 和 `web/bun.lock`，执行 `bun install --frozen-lockfile`，然后复制源码并运行 `bun run build`。锁文件缺失或与依赖声明不一致时直接失败，不回退到 npm 或自动更新依赖。依赖变更须同步提交 `web/bun.lock`。
+
+保留 `NPM_REGISTRY` 构建参数用于指定 Bun 下载包的镜像源，默认 `https://registry.npmmirror.com/`；缓存仅加速下载，不改变锁定版本。冻结安装防止依赖版本漂移，但无法消除下载源不可用或锁定包缺失的问题；此时可以切换官方源，仍须保持冻结安装：
+
+```bash
+docker build -f deploy/web.Dockerfile \
+  --build-arg NPM_REGISTRY=https://registry.npmjs.org/ \
+  --build-arg VERSION="$(cat VERSION)" \
+  -t new-api-web:lockcheck .
+```
+
+规则依据：[Bun 冻结安装说明](https://bun.sh/docs/pm/cli/install)。此调整不修改页面或 API 契约，也不会自动更新 ECS。
+
 ## 本轮提交与镜像构建方式
 
 本轮提交包含门户逐段实现、品牌默认资源、回归测试及本地开发配置。未使用的 `web/public/figma/` 仅作本地参考，不加入本轮 Git 提交，并由 `.dockerignore` 排除，避免随静态资源发布。

@@ -143,3 +143,37 @@ Adobe 抠图结果已检查为 RGBA、Alpha 范围 0–255；设备、标签及�
 
 ### AT-103 节点透明插图（2026-09-18）
 三张节点插图已使用 Adobe 抠图，均验证为 RGBA、Alpha 范围 0–255，并预览检查地图、机房及连线；首页卡片引用与回归预期同步更新。
+
+### 云端发布验证（2026-09-18，v20260918.1）
+
+基于 `dev` 分支 `4ba6fbe75` 构建前后端镜像，版本更新为 `v20260918.1`，并发布到华为云 SWR 与 ECS。Docker 构建上下文排除本地环境文件及含凭证的操作说明。沿用服务器现有环境配置及请求数据挂载；按用户明确要求跳过数据库备份，未产生有效数据库备份。旧版本容器以 `new-api-server-rollback-v20260915.1`、`new-api-web-rollback-v20260915.1` 名称停止保留；容器回滚不等同于数据库回滚。
+
+前后端镜像构建、本地隔离环境启动、Nginx 配置检查及 API 代理检查通过。云端切换后，服务器本机首页返回 HTTP 200，后端与前端代理的 `/api/status` 均返回 `success=true`、版本 `v20260918.1`。本次为部署冒烟验证，不代表真实模型调用、计费业务或浏览器视觉验收通过。
+
+### 云端发布验证（2026-09-18，v20260918.2）
+
+同步 `origin/dev` 至 `d70362c64`，包含注册后自动登录、门户文案与首屏背景更新。前后端镜像构建、SWR 推送及 ECS 拉取部署完成，使用专用 IAM 用户的长期登录凭证。沿用既有环境配置与数据挂载，按用户此前要求跳过数据库备份；上一版容器停止保留为 `new-api-server-rollback-v20260918.1` 和 `new-api-web-rollback-v20260918.1`。
+
+注册与门户共 3 个测试文件、24 个用例通过；补齐容器外的共享测试 fixture 挂载后类型检查通过，涉及的 4 个 TSX 文件 lint 通过。格式检查已执行，最新上游的 `registration-flow.test.tsx`、`portal.test.tsx`、`portal-services.tsx` 存在格式差异，未在发布任务中修改。ECS 后端状态为 healthy，首页、后端状态接口、前端 API 代理及 Nginx 配置检查通过，接口版本为 `v20260918.2`。本次未执行真实注册、模型调用、计费业务或浏览器视觉验收。
+
+### 云端发布验证（2026-09-18，v20260918.3）
+
+同步 `origin/dev` 至 `c0403ae03`，发布首页调整、登录默认跳转与 Playground 入口更新。前后端镜像已推送 SWR 并部署 ECS；后端 healthy，服务器本机首页、后端状态接口、前端 API 代理及 Nginx 配置检查通过，接口版本为 `v20260918.3`。沿用既有配置与数据挂载，按用户要求跳过数据库备份；上一版容器停止保留为 `new-api-server-rollback-v20260918.2` 和 `new-api-web-rollback-v20260918.2`。
+
+`go test ./router`、16 个前端测试文件共 124 项测试、类型检查及 14 个相关文件 lint 通过。格式检查发现上游 `use-auth-redirect.ts`、`registration-flow.test.tsx`、`portal.test.tsx`、`portal-services.tsx` 和 `portal.css` 存在格式差异，未在发布中修改。
+
+标准前端镜像构建因 npm 镜像源无法找到 `@visactor/vscale@1.0.24` 失败。依赖声明相较上一发布未变化，本次使用本地 `new-api-web-check:v20260918.2` 已安装的依赖，覆盖最新前端源码后重新编译、测试及生成运行镜像。现有 Dockerfile 未使用仓库 `bun.lock`，没有 `package-lock.json` 时执行 `npm install`，后续需改为冻结锁文件安装以稳定复现。本次未执行真实注册、模型调用、计费业务或浏览器视觉验收。
+
+### 前端镜像冻结依赖安装（2026-09-18）
+
+针对 `v20260918.3` 发布时 npm 重新解析依赖失败的问题，`deploy/web.Dockerfile` 改为固定 Bun 1.4.0 及镜像摘要，显式复制 `package.json`、`bun.lock`，执行 `bun install --frozen-lockfile` 和 `bun run build`。保留镜像源参数与下载缓存，移除 npm 安装及无锁文件回退逻辑；构建说明见[开发与构建文档](../architecture/development-compose.md#独立前端发布镜像的依赖安装)。页面与 API 契约不变。
+
+使用修改后的 Dockerfile 成功完成 1202 个包的冻结安装和生产构建，生成本地验证镜像 `new-api-web:v20260918.3-lockcheck`。Nginx 配置检查、临时容器首页访问通过，`web/package.json` 与 `web/bun.lock` 无差异。未推送此验证镜像或更新 ECS，不代表真实模型业务测试通过。
+
+负向验证：在隔离临时容器中将 React 声明改为与锁文件不一致的版本，冻结锁文件检查返回 `lockfile had changes, but lockfile is frozen`，按预期拒绝继续；未修改工作区依赖文件。
+
+### 云端发布验证（2026-09-18，v20260918.4）
+
+同步 `origin/dev` 至 `726cdae8a`，发布 Playground 本地消息按用户隔离修复，同时使用已验证的 Bun 冻结安装 Dockerfile 构建前端。前后端镜像构建、SWR 推送和 ECS 拉取部署完成。沿用现有环境配置与数据挂载，按用户要求跳过数据库备份；上一版容器停止保留为 `new-api-server-rollback-v20260918.3` 和 `new-api-web-rollback-v20260918.3`。
+
+Playground 共 3 个测试文件、11 项测试通过，类型检查、5 个相关文件 lint 和格式检查通过。最初直接在 Bun 运行时运行 Vitest 出现 Zod 模块加载错误；改用 Node 22.16.0 运行同一镜像内冻结安装的依赖后通过，未改动依赖或产品源码。ECS 后端 healthy，服务器本机首页、后端状态接口、前端 API 代理及 Nginx 配置检查通过，接口版本 `v20260918.4`。本次未执行真实模型调用、计费业务或浏览器用户切换验收。
