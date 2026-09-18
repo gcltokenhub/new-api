@@ -274,8 +274,8 @@ describe('default portal', () => {
       )
       const heroGrid = hero.querySelector('.portal-hero-grid')
       expect(heroGrid).not.toBeNull()
-      expect(getComputedStyle(heroGrid as Element).backgroundImage).toContain(
-        'linear-gradient(90deg, rgb(255, 255, 255) 50%, rgb(245, 246, 251) 100%)'
+      expect(getComputedStyle(heroGrid as Element).backgroundImage).not.toContain(
+        'gradient('
       )
     } finally {
       stylesheet.remove()
