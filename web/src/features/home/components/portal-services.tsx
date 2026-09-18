@@ -75,19 +75,8 @@ export function PortalServices(props: { isAuthenticated: boolean }) {
               <h2 id='connect-title'>{t('portal.cta.title')}</h2>
               <p>{t('portal.cta.description')}</p>
             </div>
-            <Button
-              role='link'
-              className='portal-button'
-              render={
-                <Link to={props.isAuthenticated ? '/dashboard' : '/sign-up'} />
-              }
-            >
-              {t(
-                props.isAuthenticated
-                  ? 'portal.action.console'
-                  : 'portal.action.connect'
-              )}{' '}
-              <span aria-hidden>→</span>
+            <Button className='portal-button'>
+              {t('portal.cta.contact')}
             </Button>
           </div>
         </div>
