@@ -22,6 +22,7 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { useStatus } from '@/hooks/use-status'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { api } from '@/lib/api'
 import {
   getModuleAccessForGuard,
@@ -263,3 +264,17 @@ describe('module guard status freshness', () => {
     }
   )
 })
+
+test.each(['New API', '团队 New-API 平台', '自定义系统'])(
+  'preserves configured system name %s',
+  async (name) => {
+    const client = createQueryClient()
+    stubStatusEndpoint(name)
+    await ensureStatus(client)
+    const { result } = renderHook(() => useSystemConfig(), {
+      wrapper: wrapper(client),
+    })
+    expect(result.current.systemName).toBe(name)
+    expect(useSystemConfigStore.getState().config.systemName).toBe(name)
+  }
+)

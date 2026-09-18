@@ -48,10 +48,10 @@ const MoreIcon = () => (
 export function Hero(props: HeroProps) {
   const { t } = useTranslation()
   const { status } = useStatus()
-  const docsUrl =
-    (status?.docs_link as string | undefined) || 'https://docs.newapi.pro'
+  const docsUrl = (status?.docs_link as string | undefined) || ''
 
   const renderDocsButton = () => {
+    if (!docsUrl || /new-?api|quantumnous/i.test(docsUrl)) return null
     const isExternal = docsUrl.startsWith('http')
     if (isExternal) {
       return (

@@ -1,0 +1,26 @@
+.token-auth {
+  color-scheme: light;
+  --background: #fff;
+  --foreground: #172033;
+  --card: #fff;
+  --card-foreground: #172033;
+  --popover: #fff;
+  --popover-foreground: #172033;
+  --primary: #1764f5;
+  --primary-foreground: #fff;
+  --muted: #f4f7fb;
+  --muted-foreground: #62718a;
+  --border: #dce5f2;
+  --input: #dce5f2;
+  --ring: #1764f5;
+}
+
+.token-auth [data-slot='input'] {
+  height: 50px !important;
+  padding-inline: 16px;
+  background: #fff !important;
+}
+
+.token-auth [data-slot='button'] {
+  min-height: 50px;
+}
