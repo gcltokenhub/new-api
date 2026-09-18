@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/stores/auth-store'
+
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -26,6 +28,14 @@ import {
 } from './hooks'
 
 export function Playground() {
+  const userId = useAuthStore((state) => state.auth.user?.id)
+
+  if (userId === undefined) return null
+
+  return <PlaygroundSession key={userId} userId={userId} />
+}
+
+function PlaygroundSession(props: { userId: number }) {
   const {
     config,
     parameterEnabled,
@@ -39,7 +49,7 @@ export function Playground() {
     updateConfig,
     updateParameterEnabled,
     clearMessages,
-  } = usePlaygroundState()
+  } = usePlaygroundState(props.userId)
 
   const { sendChat, stopGeneration, isGenerating } = useChatHandler({
     config,

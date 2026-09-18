@@ -36,8 +36,8 @@ export function getInitialParameterEnabled(): ParameterEnabled {
   return { ...DEFAULT_PARAMETER_ENABLED, ...loadParameterEnabled() }
 }
 
-export function getInitialMessages(): Message[] {
-  return loadMessages() || []
+export function getInitialMessages(userId: number): Message[] {
+  return loadMessages(userId) || []
 }
 
 export function applyMessageStateUpdate(
