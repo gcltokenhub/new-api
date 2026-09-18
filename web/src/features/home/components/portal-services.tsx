@@ -16,13 +16,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Link } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 
-export function PortalServices(props: { isAuthenticated: boolean }) {
+export function PortalServices() {
   const { t } = useTranslation()
+  const [contactOpen, setContactOpen] = useState(false)
+  const contactRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (!contactRef.current?.contains(event.target as Node)) {
+        setContactOpen(false)
+      }
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setContactOpen(false)
+    }
+    document.addEventListener('pointerdown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
+
   return (
     <>
       <section
@@ -42,14 +62,10 @@ export function PortalServices(props: { isAuthenticated: boolean }) {
               {t('portal.services.description')}
             </p>
             <Button
-              role='link'
               className='portal-button'
               variant='outline'
-              render={
-                <Link to={props.isAuthenticated ? '/dashboard' : '/sign-up'} />
-              }
             >
-              {t('portal.services.action')} <span aria-hidden>→</span>
+              {t('portal.services.action')}
             </Button>
           </div>
           <div className='portal-service-cards'>
@@ -75,9 +91,31 @@ export function PortalServices(props: { isAuthenticated: boolean }) {
               <h2 id='connect-title'>{t('portal.cta.title')}</h2>
               <p>{t('portal.cta.description')}</p>
             </div>
-            <Button className='portal-button'>
-              {t('portal.cta.contact')}
-            </Button>
+            <div
+              ref={contactRef}
+              className='portal-contact'
+              data-open={contactOpen}
+            >
+              <Button
+                className='portal-button'
+                aria-expanded={contactOpen}
+                aria-controls='portal-contact-panel'
+                onClick={() => setContactOpen((open) => !open)}
+              >
+                {t('portal.cta.contact')}
+              </Button>
+              <div id='portal-contact-panel' className='portal-contact-panel'>
+                <div className='portal-contact-card'>
+                  <img
+                    src='/wechat-contact-qr.png'
+                    alt={t('portal.cta.qrCode')}
+                    width={180}
+                    height={180}
+                  />
+                  <p>{t('portal.cta.qrHint')}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

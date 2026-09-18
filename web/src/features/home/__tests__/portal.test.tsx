@@ -179,16 +179,18 @@ describe('default portal', () => {
     await renderHome()
     const west = await screen.findByRole('article', { name: '华西算力中心' })
     expect(within(west).getByText('运行中')).toBeInTheDocument()
-    expect(within(west).getByText('成都 / 重庆')).toBeInTheDocument()
+    expect(within(west).getByText('乌兰察布 / 和林格尔')).toBeInTheDocument()
     expect(within(west).getByText('12')).toBeInTheDocument()
     expect(within(west).getByText('86')).toBeInTheDocument()
     expect(within(west).getByText('西部区域')).toBeInTheDocument()
 
     const east = screen.getByRole('article', { name: '华东数据中心' })
+    expect(within(east).getByText('上海 / 苏州 / 杭州')).toBeInTheDocument()
     expect(within(east).getByText('18')).toBeInTheDocument()
     expect(within(east).getByText('78')).toBeInTheDocument()
 
     const overseas = screen.getByRole('article', { name: '海外合作节点' })
+    expect(within(overseas).getByText('马来西亚 / 印度尼西亚')).toBeInTheDocument()
     expect(within(overseas).getByText('接入中')).toBeInTheDocument()
     expect(within(overseas).getByText('96')).toBeInTheDocument()
     expect(within(overseas).getByText('71')).toBeInTheDocument()
@@ -206,13 +208,13 @@ describe('default portal', () => {
       const card = screen.getByRole('article', { name })
       expect(within(card).getByRole('img', { name })).toHaveAttribute(
         'src',
-        `/figma/portal-node-${image}.png`
+        `/figma/portal-node-${image}-cutout.png`
       )
     }
   })
 
   it('shows the six Figma enterprise service cards on the default portal', async () => {
-    await renderHome()
+    const { router } = await renderHome()
     const services = await screen.findByRole('region', {
       name: /从一次模型调用/,
     })
@@ -233,9 +235,12 @@ describe('default portal', () => {
         within(services).getByRole('heading', { name: title })
       ).toBeInTheDocument()
     }
-    expect(
-      within(services).getByRole('link', { name: '了解企业方案' })
-    ).toHaveAttribute('href', '/sign-up')
+    const enterpriseButton = within(services).getByRole('button', {
+      name: '了解企业方案',
+    })
+    expect(enterpriseButton).not.toHaveTextContent('→')
+    await userEvent.click(enterpriseButton)
+    expect(router.state.location.pathname).toBe('/')
   })
 
   it('follows Figma by showing the bottom access banner directly after enterprise services', async () => {
@@ -274,9 +279,9 @@ describe('default portal', () => {
       )
       const heroGrid = hero.querySelector('.portal-hero-grid')
       expect(heroGrid).not.toBeNull()
-      expect(getComputedStyle(heroGrid as Element).backgroundImage).not.toContain(
-        'gradient('
-      )
+      expect(
+        getComputedStyle(heroGrid as Element).backgroundImage
+      ).not.toContain('gradient(')
     } finally {
       stylesheet.remove()
     }
@@ -327,41 +332,28 @@ describe('default portal', () => {
     expect(screen.queryByText(/portal\./)).not.toBeInTheDocument()
   })
 
-  it('shows the catalog fallback when the multimodal category has no showcase entries', async () => {
+  it('places the pricing link beside the model heading when categories are removed', async () => {
     await renderHome()
-    const tab = await screen.findByRole('tab', { name: '多模态' })
-    await userEvent.setup().click(tab)
-    expect(tab).toHaveAttribute('aria-selected', 'true')
-    const panel = screen.getByRole('tabpanel', { name: '多模态' })
+    const section = await screen.findByRole('region', {
+      name: '热门模型，一次接入',
+    })
+    const heading = section.querySelector('.portal-section-heading')
+    expect(heading).not.toBeNull()
     expect(
-      within(panel).getByRole('link', { name: '查看模型广场与价格' })
+      within(heading as HTMLElement).getByRole('link', {
+        name: '查看模型广场与价格',
+      })
     ).toHaveAttribute('href', '/pricing')
-    expect(
-      screen.queryByRole('heading', { name: 'DeepSeek' })
-    ).not.toBeInTheDocument()
-  })
-
-  it('lets the keyboard switch model categories and restore showcase cards', async () => {
-    await renderHome()
-    const tab = await screen.findByRole('tab', { name: '热门模型' })
-    tab.focus()
-    await userEvent.setup().keyboard('{ArrowRight}{Enter}')
-    expect(screen.getByRole('tab', { name: '文本模型' })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    )
-    expect(
-      within(screen.getByRole('tabpanel', { name: '文本模型' })).getByRole(
-        'heading',
-        { name: 'DeepSeek' }
-      )
-    ).toBeInTheDocument()
+    expect(within(section).queryByRole('tablist')).not.toBeInTheDocument()
+    expect(within(section).getAllByRole('article')).toHaveLength(5)
   })
 
   it('shows brand names with capability descriptions in showcase cards when the default portal loads', async () => {
     await renderHome()
-    const panel = await screen.findByRole('tabpanel', { name: '热门模型' })
-    const cards = within(panel).getAllByRole('article')
+    const section = await screen.findByRole('region', {
+      name: '热门模型，一次接入',
+    })
+    const cards = within(section).getAllByRole('article')
     expect(
       cards.map((card) => within(card).getByRole('heading').textContent)
     ).toEqual(['DeepSeek', 'Qwen', 'GLM', 'Doubao', 'Kimi'])
@@ -369,8 +361,13 @@ describe('default portal', () => {
       within(cards[0]).getByText('面向文本生成、知识问答与 Agent 场景。')
     ).toBeInTheDocument()
     expect(
-      within(cards[0]).getByText('可用性及价格以模型广场为准')
+      within(cards[1]).getByText(
+        '面向多语言对话、知识问答与工具调用等应用场景。'
+      )
     ).toBeInTheDocument()
+    expect(
+      within(section).queryByText('可用性及价格以模型广场为准')
+    ).not.toBeInTheDocument()
   })
 
   it('offers the console instead of signup for an authenticated user', async () => {

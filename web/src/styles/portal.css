@@ -186,7 +186,6 @@
   font-size: 14px;
 }
 .portal-section-heading a,
-.portal-catalog-link,
 .portal-docs-link {
   color: #1764f5;
   font-size: 14px;
@@ -217,11 +216,8 @@
   min-height: 486px;
   padding: 22px;
   border-radius: 16px;
-  background: #fff;
+  background: #f2f7ff;
   box-shadow: 0 18px 50px #0000001f;
-}
-.portal-compute-card:first-child {
-  background: linear-gradient(134deg, #fff 6%, #f2f7ff 94%);
 }
 .portal-compute-card h3 {
   margin-top: 8px;
@@ -273,9 +269,11 @@
 }
 .portal-node-illustration {
   display: block;
-  width: 100%;
+  width: calc(100% + 40px);
+  max-width: none;
   height: auto;
   margin-top: 24px;
+  margin-inline: -20px;
   object-fit: contain;
 }
 .portal-supply {
@@ -362,16 +360,7 @@
 .portal-model-card p {
   font-size: 13px;
   line-height: 1.8;
-}
-.portal-model-card .portal-model-note {
-  border-top: 1px solid #edf1f7;
-  margin-top: auto;
-  padding-top: 20px;
-  margin-bottom: 16px;
-  font-size: 11px;
-}
-.portal-model-card p + .portal-model-note {
-  margin-top: 28px;
+  margin-bottom: 25px;
 }
 .token-portal .portal-model-action {
   width: 100%;
@@ -380,10 +369,6 @@
   color: #1764f5;
   background: #eff5ff;
   white-space: normal;
-}
-.portal-catalog-link {
-  display: inline-block;
-  margin-top: 24px;
 }
 .portal-services {
   background: #f7f9fc;
@@ -462,6 +447,54 @@
 .portal-cta .portal-button {
   background: white;
   color: #1764f5;
+}
+.portal-contact {
+  position: relative;
+  flex: none;
+}
+.portal-contact-panel {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 10;
+  width: 228px;
+  padding-bottom: 12px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 150ms ease, visibility 150ms ease;
+}
+.portal-contact[data-open='true'] .portal-contact-panel {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: hover) {
+  .portal-contact:hover .portal-contact-panel {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.portal-contact-card {
+  padding: 18px;
+  border: 1px solid #dce7f5;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(10 44 95 / 18%);
+  text-align: center;
+}
+.portal-contact-card img {
+  display: block;
+  width: 180px;
+  height: 180px;
+}
+.portal-cta .portal-contact-card p {
+  margin-top: 12px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
 }
 .portal-footer {
   border-top: 1px solid #edf1f6;

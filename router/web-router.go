@@ -21,6 +21,9 @@ type WebAssets struct {
 
 func SetWebRouter(router *gin.Engine, assets WebAssets, pluginDispatcher gin.HandlerFunc) {
 	frontendFS := common.EmbedFolder(assets.BuildFS, "web/dist")
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.Redirect(http.StatusTemporaryRedirect, "/token-factory-mark.svg")
+	})
 
 	router.NoRoute(
 		pluginDispatcher,

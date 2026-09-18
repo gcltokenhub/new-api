@@ -19,9 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-import { EmptyState } from '@/components/empty-state'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const models = [
   { name: 'DeepSeek', mark: 'D', key: 'deepseek' },
@@ -45,7 +43,6 @@ function ModelCards() {
           </div>
           <h3>{model.name}</h3>
           <p>{t(`portal.models.${model.key}`)}</p>
-          <p className='portal-model-note'>{t('portal.models.note')}</p>
           <Button
             role='link'
             className='portal-model-action'
@@ -71,47 +68,16 @@ export function PortalModels() {
     >
       <div className='portal-container'>
         <p className='portal-eyebrow'>MODEL MARKET</p>
-        <Tabs defaultValue='popular'>
-          <div className='portal-section-heading'>
-            <div>
-              <h2 id='models-title'>{t('portal.models.title')}</h2>
-              <p>{t('portal.models.description')}</p>
-            </div>
-            <TabsList aria-label={t('portal.models.categories')}>
-              <TabsTrigger value='popular'>
-                {t('portal.models.popular')}
-              </TabsTrigger>
-              <TabsTrigger value='text'>{t('portal.models.text')}</TabsTrigger>
-              <TabsTrigger value='multimodal'>
-                {t('portal.models.multimodal')}
-              </TabsTrigger>
-            </TabsList>
+        <div className='portal-section-heading'>
+          <div>
+            <h2 id='models-title'>{t('portal.models.title')}</h2>
+            <p>{t('portal.models.description')}</p>
           </div>
-          <TabsContent value='popular'>
-            <ModelCards />
-          </TabsContent>
-          <TabsContent value='text'>
-            <ModelCards />
-          </TabsContent>
-          <TabsContent value='multimodal'>
-            <EmptyState
-              title={t('portal.models.multimodal.title')}
-              description={t('portal.models.multimodal.description')}
-              action={
-                <Button
-                  role='link'
-                  className='portal-button'
-                  render={<Link to='/pricing' />}
-                >
-                  {t('portal.action.catalog')}
-                </Button>
-              }
-            />
-          </TabsContent>
-        </Tabs>
-        <Link className='portal-catalog-link' to='/pricing'>
-          {t('portal.action.catalog')} <span aria-hidden>→</span>
-        </Link>
+          <Link to='/pricing'>
+            {t('portal.action.catalog')} <span aria-hidden>→</span>
+          </Link>
+        </div>
+        <ModelCards />
       </div>
     </section>
   )

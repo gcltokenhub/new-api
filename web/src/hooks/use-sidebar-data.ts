@@ -71,7 +71,7 @@ export function useSidebarData(): SidebarData {
       },
       {
         id: 'general',
-        title: t('General'),
+        title: t('Console'),
         items: [
           {
             title: t('Overview'),
