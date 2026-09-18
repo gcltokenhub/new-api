@@ -370,7 +370,7 @@ describe('default portal', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('offers the console instead of signup for an authenticated user', async () => {
+  it('opens the playground from the authenticated home action', async () => {
     useAuthStore.setState({
       auth: {
         ...initialAuth.auth,
@@ -383,7 +383,7 @@ describe('default portal', () => {
     )[0]
     await userEvent.setup().click(action)
     expect(
-      await screen.findByRole('heading', { name: '/dashboard' })
+      await screen.findByRole('heading', { name: '/playground' })
     ).toBeInTheDocument()
   })
 })

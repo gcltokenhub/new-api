@@ -51,7 +51,7 @@ export function PortalHeader(props: { isAuthenticated: boolean }) {
           role='link'
           className='portal-button'
           render={
-            <Link to={props.isAuthenticated ? '/dashboard' : '/sign-up'} />
+            <Link to={props.isAuthenticated ? '/playground' : '/sign-up'} />
           }
         >
           {t(
