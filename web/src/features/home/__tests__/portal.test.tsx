@@ -144,7 +144,7 @@ describe('default portal', () => {
     const hero = await screen.findByRole('region', { name: /把模型与算力/ })
     expect(
       within(hero).getByText(
-        '统一汇聚国内主流模型、算力资源与 API，帮助企业按需获得稳定、安全、可治理的智能能力。'
+        '统一汇聚国内主流模型、算力资源与 API，帮助企业按需获得稳定、安全、可治理的AI智能化能力。'
       )
     ).toBeInTheDocument()
   })

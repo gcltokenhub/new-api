@@ -60,10 +60,10 @@ async function submitRegistration() {
     path: '/sign-in',
     component: () => <h1>Sign in page</h1>,
   })
-  const dashboard = createRoute({
+  const playground = createRoute({
     getParentRoute: () => root,
-    path: '/dashboard',
-    component: () => <h1>Dashboard page</h1>,
+    path: '/playground',
+    component: () => <h1>Playground page</h1>,
   })
   const otp = createRoute({
     getParentRoute: () => root,
@@ -71,7 +71,7 @@ async function submitRegistration() {
     component: () => <h1>Verification page</h1>,
   })
   const router = createRouter({
-    routeTree: root.addChildren([signUp, signIn, dashboard, otp]),
+    routeTree: root.addChildren([signUp, signIn, playground, otp]),
     history: createMemoryHistory({ initialEntries: ['/sign-up'] }),
   })
   render(<RouterProvider router={router} />)
@@ -83,13 +83,13 @@ async function submitRegistration() {
   await user.click(screen.getByRole('button', { name: 'auth.portal.signupSubmit' }))
 }
 
-it('signs in with submitted credentials and enters the dashboard after registration succeeds', async () => {
+it('signs in with submitted credentials and enters the playground after registration succeeds', async () => {
   vi.mocked(register).mockResolvedValue({ success: true, message: '' })
   vi.mocked(login).mockResolvedValue({ success: true, message: '', data: bundle })
 
   await submitRegistration()
 
-  expect(await screen.findByRole('heading', { name: 'Dashboard page' })).toBeVisible()
+  expect(await screen.findByRole('heading', { name: 'Playground page' })).toBeVisible()
   expect(login).toHaveBeenCalledWith({
     username: 'new-user',
     password: 'password123',
