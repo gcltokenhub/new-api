@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { register, wechatLoginByCode } from '@/features/auth/api'
+import { login, register, wechatLoginByCode } from '@/features/auth/api'
 import { LegalConsent } from '@/features/auth/components/legal-consent'
 import { OAuthProviders } from '@/features/auth/components/oauth-providers'
 import { registerFormSchema } from '@/features/auth/constants'
@@ -100,6 +100,10 @@ export function SignUpForm({
 
   const emailValue = useWatch({ control: form.control, name: 'email' })
   const emailVerificationRequired = !!status?.email_verification
+  const passwordLoginEncryptionEnabled =
+    (status?.password_login_encryption_enabled ??
+      status?.data?.password_login_encryption_enabled ??
+      false) === true
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
   const requiresLegalConsent = hasUserAgreement || hasPrivacyPolicy
@@ -163,7 +167,22 @@ export function SignUpForm({
       })
 
       if (res?.success) {
-        toast.success(t('Account created! Please sign in'))
+        try {
+          const loginResult = await login({
+            username: data.username.trim(),
+            password: data.password,
+            passwordEncryptionEnabled: passwordLoginEncryptionEnabled,
+          })
+          if (loginResult.success) {
+            if (await handleLoginResult(loginResult.data)) {
+              toast.success(t('Account created and signed in'))
+            }
+            return
+          }
+        } catch {
+          // Registration succeeded; let the user sign in manually if automatic login fails.
+        }
+        toast.info(t('Account created! Please sign in'))
         redirectToLogin()
       } else {
         handleServerError(createServerError(res, t('Failed to create account')))
