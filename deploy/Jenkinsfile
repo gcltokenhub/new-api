@@ -1,0 +1,105 @@
+// new-api 生产发布流水线（Jenkins job: tokenhub_prod/new-api，分支 main）
+//
+// 流程：拉代码 → 决定 IMAGE_TAG → 构建 server/web 镜像 → 推华为云 SWR → ssh 到 ECS 执行部署脚本
+//
+// IMAGE_TAG 规则：当前 commit 上打了 git tag 就用 tag（如 v20260919.1），没有就用 8 位 commit id。
+// 所有凭据都从 Jenkins 凭据库取（tokenhub_prod 文件夹里），本文件不含任何密码。
+
+pipeline {
+  agent any
+  options {
+    timestamps()
+    disableConcurrentBuilds()          // 同一时刻只允许一次发布
+    buildDiscarder(logRotator(numToKeepStr: '30'))
+  }
+
+  environment {
+    REGISTRY   = 'swr.cn-east-3.myhuaweicloud.com'      // 镜像仓库域名，也是 Jenkins 里 SWR 凭据的 ID
+    IMAGE_NS   = 'swr.cn-east-3.myhuaweicloud.com/tokenhub'
+    ECS_HOST   = '123.60.57.211'                        // 生产 ECS（先一台）
+    ECS_CRED   = 'ecs-deploy'                           // Jenkins 里 ECS 的 SSH 私钥凭据 ID
+  }
+
+  stages {
+
+    stage('决定 IMAGE_TAG') {
+      steps {
+        script {
+          def commitId = sh(script: 'git rev-parse --short=8 HEAD', returnStdout: true).trim()
+          // 只取"正好打在当前 commit 上"的 tag；多个时取版本号最大的
+          def gitTag   = sh(script: 'git tag --points-at HEAD | sort -V | tail -1', returnStdout: true).trim()
+
+          env.IMAGE_TAG = gitTag ?: commitId
+
+          echo "commit  = ${commitId}"
+          echo "git tag = ${gitTag ?: '(无)'}"
+          echo "==> IMAGE_TAG = ${env.IMAGE_TAG}"
+          currentBuild.displayName = "#${env.BUILD_NUMBER} ${env.IMAGE_TAG}"
+        }
+      }
+    }
+
+    stage('构建镜像') {
+      parallel {
+        stage('server') {
+          steps {
+            sh '''
+              docker build --provenance=false --sbom=false \
+                -f deploy/server.Dockerfile \
+                --build-arg VERSION=${IMAGE_TAG} \
+                -t ${IMAGE_NS}/new-api-server:${IMAGE_TAG} .
+            '''
+          }
+        }
+        stage('web') {
+          steps {
+            sh '''
+              docker build --provenance=false --sbom=false \
+                -f deploy/web.Dockerfile \
+                --build-arg VERSION=${IMAGE_TAG} \
+                -t ${IMAGE_NS}/new-api-web:${IMAGE_TAG} .
+            '''
+          }
+        }
+      }
+    }
+
+    stage('推送到 SWR') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: env.REGISTRY, usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
+          sh '''
+            echo "$REG_PASS" | docker login ${REGISTRY} -u "$REG_USER" --password-stdin
+            docker push ${IMAGE_NS}/new-api-server:${IMAGE_TAG}
+            docker push ${IMAGE_NS}/new-api-web:${IMAGE_TAG}
+            # 再打一个 latest 浮动标签，方便查看"最新发布是哪个"；部署始终用 IMAGE_TAG，不用 latest
+            docker tag ${IMAGE_NS}/new-api-server:${IMAGE_TAG} ${IMAGE_NS}/new-api-server:latest
+            docker tag ${IMAGE_NS}/new-api-web:${IMAGE_TAG}    ${IMAGE_NS}/new-api-web:latest
+            docker push ${IMAGE_NS}/new-api-server:latest
+            docker push ${IMAGE_NS}/new-api-web:latest
+          '''
+        }
+      }
+    }
+
+    stage('部署到 ECS') {
+      steps {
+        // 用 Jenkins 凭据库里的 SSH 私钥连 ECS；脚本内容随本次代码一起传过去执行
+        withCredentials([sshUserPrivateKey(credentialsId: env.ECS_CRED, keyFileVariable: 'ECS_KEY', usernameVariable: 'ECS_USER')]) {
+          sh '''
+            ssh -i "$ECS_KEY" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+                ${ECS_USER}@${ECS_HOST} 'bash -s' ${IMAGE_TAG} < deploy/hwcloud/deploy-on-ecs.sh
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo "✅ 发布完成: ${env.IMAGE_TAG}  →  http://${env.ECS_HOST}" }
+    failure { echo "❌ 发布失败: ${env.IMAGE_TAG}（部署阶段失败时 ECS 已自动回滚到上一版本）" }
+    always  {
+      // 清理本机构建产物，避免 Jenkins 机磁盘被镜像层撑满（BuildKit 缓存另有上限）
+      sh 'docker image prune -f >/dev/null 2>&1 || true'
+    }
+  }
+}
